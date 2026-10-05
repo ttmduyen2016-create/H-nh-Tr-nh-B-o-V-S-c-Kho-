@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hành Trình Bảo Vệ Sức Khỏe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6; /* Blue */
+            --secondary: #10b981; /* Green */
+            --warning: #f59e0b; /* Orange */
+            --danger: #ef4444; /* Red */
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #bfdbfe 0%, #e0f2fe 50%, #bae6fd 100%);
+            background-color: #e0f2fe;
+            color: #1e293b;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #app-container {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2vh 2vw;
+        }
+
+        .main-card {
+            width: 100%;
+            height: 100%;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 4px solid #fff;
+            padding: 4vh 4vw; 
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 3vh 4vw;
+                border-radius: 20px;
+                height: 96vh;
+            }
+        }
+
+        /* Bouncy Button Style */
+        .btn-3d {
+            transition: all 0.1s ease;
+            box-shadow: 0 6px 0 0 rgba(0,0,0,0.2);
+            position: relative;
+            top: 0;
+            border: 3px solid rgba(255,255,255,0.4);
+        }
+        .btn-3d:active {
+            top: 6px;
+            box-shadow: 0 0px 0 0 rgba(0,0,0,0.2);
+        }
+        
+        /* Option Button Style */
+        .btn-option {
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 0 #cbd5e1;
+            border: 4px solid #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        .btn-option:hover {
+            border-color: #93c5fd;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 0 0 #93c5fd;
+        }
+        .btn-option:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 0 #93c5fd;
+        }
+        .btn-option.selected {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            box-shadow: 0 6px 0 0 #3b82f6;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        .animate-bounce-slow { animation: bounce 2s infinite ease-in-out; }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+        /* 3D Text Styles */
+        .text-3d-green {
+            color: #16a34a;
+            text-shadow: 1px 1px 0 #14532d, 2px 2px 0 #14532d, 3px 3px 0 #14532d, 4px 4px 0 #064e3b, 5px 5px 0 #064e3b, 6px 6px 12px rgba(0,0,0,0.4);
+        }
+        .text-3d-orange {
+            color: #c2410c; 
+            text-shadow: 1px 1px 0 #9a3412, 2px 2px 0 #9a3412, 3px 3px 0 #7c2d12, 4px 4px 0 #7c2d12, 5px 5px 0 #431407, 6px 6px 0 #431407, 7px 7px 12px rgba(0,0,0,0.5);
+        }
+        
+        .map-node {
+            width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+            box-shadow: 0 8px 0 0 rgba(0,0,0,0.2); transition: all 0.3s; background-color: white; border: 5px solid #cbd5e1; position: relative; z-index: 10; margin: 0 auto;
+        }
+        .map-node.active { border-color: #3b82f6; background-color: #bfdbfe; box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.5); animation: pop 0.5s ease; }
+        .map-node.completed { border-color: #10b981; background-color: #d1fae5; }
+
+        .hide { display: none !important; }
+        #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+    <!-- Nút điều khiển âm thanh và chế độ giáo viên góc trên -->
+    <div class="absolute top-4 right-4 z-50 flex gap-2">
+        <button id="btn-sound" class="w-12 h-12 rounded-full bg-white/90 shadow-lg border-2 border-gray-200 flex items-center justify-center text-2xl hover:bg-white transition-colors backdrop-blur-sm" onclick="toggleSound()" title="Bật/Tắt âm thanh">🔊</button>
+    </div>
+
+    <div id="app-container">
+        
+        <!-- HỘP NỘI DUNG TRUNG TÂM -->
+        <div class="main-card" id="main-content-area">
+            
+            <!-- ================= MÀN HÌNH CHÍNH ================= -->
+            <section id="screen-start" class="flex-1 flex flex-col items-center justify-center text-center w-full h-full animate-fade-in">
+                <h2 class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black uppercase tracking-wide mb-8 text-3d-green whitespace-nowrap">
+                    THCS Tân Xuân - Phân hiệu chính
+                </h2>
+                
+                <h1 class="text-[3rem] md:text-[5rem] lg:text-[6rem] font-black mb-4 uppercase tracking-wide text-3d-orange leading-tight">
+                    Hành Trình<br>Bảo Vệ Sức Khỏe
+                </h1>
+                
+                <p class="text-xl md:text-3xl text-blue-900 mb-12 font-black italic drop-shadow-md bg-white/40 px-6 py-2 rounded-full backdrop-blur-sm">
+                    "Cùng vượt qua thử thách – Cùng bảo vệ sức khỏe"
+                </p>
+                
+                <div class="flex flex-col gap-3 w-full max-w-sm mb-6 animate-fade-in">
+                    <input type="text" id="start-name" placeholder="Nhập Họ và Tên..." class="w-full p-4 border-4 border-blue-200 rounded-2xl font-bold text-xl text-center focus:border-blue-500 outline-none shadow-inner text-gray-800">
+                    <input type="text" id="start-class" placeholder="Nhập Lớp (Vd: 6A1)..." class="w-full p-4 border-4 border-blue-200 rounded-2xl font-bold text-xl text-center focus:border-blue-500 outline-none shadow-inner text-gray-800">
+                    <div id="start-error" class="text-red-600 font-bold bg-red-100 py-2 rounded-xl hidden border-2 border-red-300">⚠️ Vui lòng nhập đủ Họ tên và Lớp!</div>
+                </div>
+                
+                <div class="flex flex-col gap-6 w-full max-w-sm">
+                    <button onclick="startGame()" class="btn-3d bg-blue-500 hover:bg-blue-600 text-white font-black text-3xl md:text-4xl py-5 px-8 rounded-full w-full">
+                        ▶️ BẮT ĐẦU
+                    </button>
+                    <button onclick="showScreen('screen-guide')" class="btn-3d bg-orange-500 hover:bg-orange-600 text-white font-bold text-2xl py-4 px-8 rounded-full w-full">
+                        📖 HƯỚNG DẪN
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================= HƯỚNG DẪN ================= -->
+            <section id="screen-guide" class="flex-1 flex flex-col items-center justify-center w-full h-full hide animate-fade-in">
+                <h2 class="text-4xl md:text-5xl font-black text-blue-700 mb-8 uppercase flex items-center gap-2 drop-shadow-md bg-white/60 px-6 py-2 rounded-full backdrop-blur">
+                    📖 Hướng dẫn chơi
+                </h2>
+                
+                <div class="bg-white/95 backdrop-blur-md border-4 border-blue-200 rounded-3xl p-6 md:p-10 w-full max-w-2xl shadow-2xl text-gray-800 space-y-6 text-xl md:text-2xl">
+                    <div class="flex items-start gap-4">
+                        <span class="text-4xl">🎯</span>
+                        <div><strong class="text-blue-700">NHIỆM VỤ:</strong><br>Trả lời các câu hỏi để vượt qua 2 Trạm sức khỏe: Sốt xuất huyết và Bại liệt.</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <span class="text-4xl">⭐</span>
+                        <div><strong class="text-blue-700">CÁCH TÍNH ĐIỂM:</strong><br>Trả lời đúng: <b>+10 điểm</b>.<br>Trả lời sai: <b>0 điểm</b> (Cứ tự tin chọn nhé!).</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <span class="text-4xl">❤️</span>
+                        <div><strong class="text-blue-700">SỨC KHỎE:</strong><br>Bạn luôn có 3 trái tim sức khỏe. Không bao giờ lo bị "Game Over"!</div>
+                    </div>
+                </div>
+
+                <button onclick="showScreen('screen-start')" class="mt-10 btn-3d bg-gray-500 hover:bg-gray-600 text-white font-bold text-2xl py-4 px-10 rounded-full">
+                    ⬅️ QUAY LẠI
+                </button>
+            </section>
+
+            <!-- ================= BẢN ĐỒ ================= -->
+            <section id="screen-map" class="flex-1 flex flex-col items-center justify-center w-full h-full hide animate-fade-in">
+                <h2 class="text-4xl md:text-6xl font-black text-blue-700 mb-4 uppercase drop-shadow-lg text-center bg-white/50 px-6 py-2 rounded-full">Bản đồ hành trình</h2>
+                <p class="text-xl md:text-3xl text-blue-900 mb-8 font-bold drop-shadow-sm text-center">Vượt qua các trạm để nhận danh hiệu!</p>
+                
+                <div class="flex flex-row items-start justify-center w-full py-8 gap-1 md:gap-2 overflow-x-auto px-2">
+                    
+                    <!-- Khởi hành -->
+                    <div class="flex flex-col items-center shrink-0 w-20 md:w-32">
+                        <div class="h-24 md:h-32 flex items-center justify-center">
+                            <div class="map-node completed scale-75 md:scale-100 shadow-xl">🏫</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Đường dẫn -->
+                    <div class="w-6 md:w-16 h-2 md:h-3 bg-slate-300 rounded-full shadow-inner shrink-0 self-start mt-11 md:mt-14"></div>
+                    
+                    <!-- Trạm 1 -->
+                    <div class="flex flex-col items-center shrink-0 w-28 md:w-48">
+                        <div class="h-24 md:h-32 flex items-center justify-center">
+                            <div id="node-station-1" class="map-node scale-90 md:scale-125 shadow-xl">🦟</div>
+                        </div>
+                        <div class="font-black text-lg md:text-3xl text-orange-600 mt-2 mb-1 drop-shadow-md bg-white/80 px-2 py-1 rounded-xl text-center">TRẠM 1</div>
+                        <div class="text-xs md:text-xl font-bold text-gray-800 uppercase bg-white/80 px-1 md:px-4 rounded-xl text-center">Sốt Xuất Huyết</div>
+                    </div>
+                    
+                    <!-- Đường dẫn -->
+                    <div class="w-6 md:w-16 h-2 md:h-3 bg-slate-300 rounded-full shadow-inner shrink-0 self-start mt-11 md:mt-14"></div>
+                    
+                    <!-- Trạm 2 -->
+                    <div class="flex flex-col items-center shrink-0 w-28 md:w-48">
+                        <div class="h-24 md:h-32 flex items-center justify-center">
+                            <div id="node-station-2" class="map-node scale-90 md:scale-125 shadow-xl">💉</div>
+                        </div>
+                        <div class="font-black text-lg md:text-3xl text-teal-600 mt-2 mb-1 drop-shadow-md bg-white/80 px-2 py-1 rounded-xl text-center">TRẠM 2</div>
+                        <div class="text-xs md:text-xl font-bold text-gray-800 uppercase bg-white/80 px-1 md:px-4 rounded-xl text-center">Phòng Bại Liệt</div>
+                    </div>
+                    
+                    <!-- Đường dẫn -->
+                    <div class="w-6 md:w-16 h-2 md:h-3 bg-slate-300 rounded-full shadow-inner shrink-0 self-start mt-11 md:mt-14"></div>
+                    
+                    <!-- Đích -->
+                    <div class="flex flex-col items-center shrink-0 w-20 md:w-32">
+                        <div class="h-24 md:h-32 flex items-center justify-center">
+                            <div id="node-goal" class="map-node bg-yellow-100 border-yellow-400 scale-100 md:scale-150 shadow-2xl">🏆</div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <button onclick="startLevel()" class="mt-8 md:mt-12 btn-3d bg-green-500 hover:bg-green-600 text-white font-black text-2xl md:text-4xl py-4 md:py-5 px-10 md:px-12 rounded-full animate-pulse">
+                    TIẾP TỤC ➡️
+                </button>
+            </section>
+
+            <!-- ================= MÀN HÌNH CÂU HỎI ================= -->
+            <section id="screen-game" class="flex-1 flex flex-col w-full h-full hide">
+                
+                <!-- Thanh công cụ nổi trên nền ảnh -->
+                <div class="flex flex-col gap-4 mb-6">
+                    <div class="flex justify-between items-center mb-1">
+                        <div id="display-player-name" class="bg-blue-100 text-blue-800 px-5 py-2 rounded-full font-black text-lg md:text-xl border-4 border-blue-300 shadow-sm w-full text-center truncate">
+                            👤 Chiến binh: 
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div id="station-badge" class="bg-orange-100/95 backdrop-blur-sm text-orange-700 px-6 py-3 rounded-full font-black text-xl md:text-2xl border-4 border-orange-300 shadow-lg uppercase">
+                            🦟 TRẠM 1
+                        </div>
+                        <div class="bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full border-4 border-gray-200 shadow-lg flex gap-2 text-2xl md:text-3xl" id="heart-container">
+                            ❤️ ❤️ ❤️
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-4 border-blue-100 shadow-md">
+                        <span id="question-counter" class="font-black text-blue-700 text-xl md:text-2xl">CÂU 1/20</span>
+                        <div class="w-1/2 bg-gray-200 rounded-full h-4 mx-4 border border-gray-300 shadow-inner">
+                            <div id="progress-bar" class="bg-green-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <span class="font-black text-yellow-600 text-xl md:text-2xl flex items-center gap-1">⭐ <span id="score-display">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Khu vực câu hỏi (Hiển thị to rõ ràng trực tiếp trên khoảng trắng) -->
+                <div class="flex-1 flex flex-col overflow-y-auto pb-4">
+                    <h3 id="question-text" class="text-[32px] md:text-[40px] font-black text-blue-950 leading-tight mb-8 text-center drop-shadow-md">
+                        <!-- Nội dung câu hỏi -->
+                    </h3>
+
+                    <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-auto">
+                        <!-- Javascript sẽ render nút ở đây -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= KẾT THÚC ================= -->
+            <section id="screen-end" class="flex-1 flex flex-col items-center justify-center text-center w-full h-full hide overflow-y-auto py-8">
+                <div class="text-[5rem] mb-4 animate-bounce-slow drop-shadow-xl" id="end-badge-icon">🏆</div>
+                <h1 class="text-4xl md:text-5xl font-black text-blue-700 mb-2 uppercase drop-shadow-md bg-white/60 px-6 py-1 rounded-full">CHÚC MỪNG!</h1>
+                <p class="text-xl md:text-2xl text-blue-900 mb-8 font-black bg-white/60 px-6 py-1 rounded-full">Bạn đã hoàn thành Hành Trình Bảo Vệ Sức Khỏe</p>
+                
+                <!-- Thẻ Thành Tích -->
+                <div class="bg-white/95 backdrop-blur-md border-8 border-yellow-300 rounded-[2rem] p-8 w-full max-w-lg shadow-2xl mb-8 relative overflow-hidden">
+                    <h3 class="text-xl font-black text-gray-500 mb-2 uppercase tracking-widest">Danh hiệu của bạn</h3>
+                    <h2 id="end-badge-name" class="text-3xl md:text-4xl font-black text-blue-700 mb-6">CHIẾN BINH SỨC KHỎE</h2>
+                    
+                    <div class="text-6xl md:text-7xl font-black text-yellow-500 mb-6 drop-shadow-md">
+                        <span id="end-score">0</span><span class="text-3xl text-yellow-600">đ</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 text-left border-t-4 border-gray-100 pt-6">
+                        <div class="bg-green-100 p-4 rounded-2xl text-center border-2 border-green-200">
+                            <div class="text-green-600 text-lg font-black uppercase">CÂU ĐÚNG</div>
+                            <div class="text-4xl font-black text-green-700" id="end-correct">0</div>
+                        </div>
+                        <div class="bg-red-100 p-4 rounded-2xl text-center border-2 border-red-200">
+                            <div class="text-red-600 text-lg font-black uppercase">CÂU SAI</div>
+                            <div class="text-4xl font-black text-red-700" id="end-wrong">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Ghi Điểm -->
+                <div id="save-result-form" class="bg-white/95 backdrop-blur-md border-4 border-blue-300 rounded-3xl p-6 w-full max-w-lg shadow-xl mb-4">
+                    <h3 class="text-2xl font-black text-blue-800 mb-4 uppercase">Ghi Nhận Thành Tích</h3>
+                    <div id="end-player-info" class="text-xl md:text-2xl font-black text-gray-700 mb-4 bg-gray-100 py-3 rounded-2xl border-2 border-gray-200">
+                        <!-- Tên học sinh sẽ hiện ở đây -->
+                    </div>
+                    <button id="btn-submit-result" onclick="submitResult()" class="w-full btn-3d bg-green-500 hover:bg-green-600 text-white font-black text-3xl py-5 rounded-2xl transition-colors">
+                        💾 NỘP BÀI
+                    </button>
+                    <div id="submit-status" class="mt-3 text-lg font-bold text-center hidden"></div>
+                </div>
+            </section>
+
+            <!-- ================= ÔN LẠI KIẾN THỨC ================= -->
+            <section id="screen-review" class="flex-1 flex flex-col w-full h-full bg-white/95 backdrop-blur-md rounded-3xl border-4 border-blue-200 shadow-2xl p-6 md:p-8 hide">
+                <div class="flex items-center justify-between mb-6 border-b-4 border-blue-100 pb-4">
+                    <h2 class="text-3xl md:text-4xl font-black text-blue-800 uppercase flex items-center gap-3">
+                        📚 Ôn lại kiến thức
+                    </h2>
+                    <button onclick="showScreen('screen-end')" class="bg-gray-100 hover:bg-gray-200 p-3 rounded-full shadow-sm text-2xl border-2 border-gray-300">
+                        ❌
+                    </button>
+                </div>
+                
+                <p class="text-blue-700 font-bold text-xl md:text-2xl mb-6">Đọc kỹ giải thích để nhớ lâu hơn nhé!</p>
+                
+                <div id="review-list" class="flex-1 overflow-y-auto space-y-6 pr-2 pb-6">
+                    <!-- Javascript đổ dữ liệu vào đây -->
+                </div>
+                
+                <button onclick="showScreen('screen-end')" class="mt-6 w-full btn-3d bg-blue-500 hover:bg-blue-600 text-white font-black text-2xl py-5 rounded-full flex-shrink-0">
+                    ⬅️ QUAY LẠI KẾT QUẢ
+                </button>
+            </section>
+            
+        </div> <!-- KẾT THÚC VÙNG AN TOÀN -->
+
+        <!-- ================= MODAL PHẢN HỒI ĐÚNG/SAI ================= -->
+        <div id="modal-feedback" class="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hide">
+            <div id="feedback-card" class="bg-white rounded-[2rem] w-full max-w-xl p-8 md:p-10 text-center shadow-2xl transform transition-transform scale-90 border-8 border-white">
+                <div id="feedback-icon" class="text-[5rem] md:text-[6rem] mb-4 animate-pop drop-shadow-md">🎉</div>
+                <h2 id="feedback-title" class="text-4xl font-black text-green-500 mb-2 uppercase">CHÍNH XÁC!</h2>
+                <div id="feedback-score" class="text-2xl md:text-3xl font-black text-yellow-500 mb-6 flex items-center justify-center gap-2">⭐ +10 điểm</div>
+                
+                <div class="bg-blue-50 text-blue-900 p-6 rounded-3xl text-left border-4 border-blue-200 mb-8 shadow-inner">
+                    <div id="feedback-correct-ans" class="font-black mb-4 text-green-700 text-xl md:text-2xl hide">Đáp án đúng: <span id="correct-text" class="text-green-800"></span></div>
+                    <div id="feedback-explanation" class="text-lg md:text-2xl leading-relaxed mt-2 font-medium">
+                        <!-- Giải thích -->
+                    </div>
+                </div>
+
+                <button onclick="handleNextQuestion()" class="w-full btn-3d bg-blue-500 hover:bg-blue-600 text-white font-black text-2xl md:text-3xl py-5 rounded-full shadow-lg">
+                    TIẾP TỤC ➡️
+                </button>
+            </div>
+        </div>
+
+        <div id="confetti-container"></div>
+    </div>
+
+    <script>
+        // Dữ liệu 20 câu hỏi (đã bổ sung Câu 9 và Câu 18 theo yêu cầu, tổng 20 câu)
+        const questions = [
+            // TRẠM 1: SỐT XUẤT HUYẾT
+            { id: 1, label: "Câu 1", station: 1, category: "Sốt xuất huyết", question: "Bệnh sốt xuất huyết do tác nhân nào gây ra?", options: ["🅰️ Vi khuẩn", "🅱️ Vi-rút Dengue", "🅲️ Nấm", "🅳️ Ký sinh trùng"], answer: 1, explanation: "Sốt xuất huyết là bệnh truyền nhiễm cấp tính do vi-rút Dengue gây ra." },
+            { id: 2, label: "Câu 2", station: 1, category: "Sốt xuất huyết", question: "Bệnh sốt xuất huyết lây truyền từ người bệnh sang người lành chủ yếu qua đường nào?", options: ["🅰️️ Qua đường hô hấp (ho, hắt hơi)", "🅱️ Qua đường ăn uống", "🅲️ Do muỗi vằn đốt", "🅳️ Bắt tay người bệnh"], answer: 2, explanation: "Muỗi vằn (Aedes) sau khi đốt người bệnh sẽ mang vi-rút và truyền sang người lành khi đốt họ." },
+            { id: 3, label: "Câu 3", station: 1, category: "Sốt xuất huyết", question: "Muỗi vằn truyền bệnh sốt xuất huyết thường đẻ trứng ở đâu?", options: ["🅰️ Ao hồ, sông suối lớn", "🅱️ Nước đọng, dụng cụ chứa nước trong nhà và quanh nhà", "🅲️ Nước cống rãnh hôi thối", "🅳️ Bãi rác khô"], answer: 1, explanation: "Muỗi vằn ưa đẻ trứng ở những nơi có nước sạch, đọng lại trong lu, lốp xe, bình hoa..." },
+            { id: 4, label: "Câu 4", station: 1, category: "Sốt xuất huyết", question: "Dấu hiệu nào sau đây nghi ngờ mắc bệnh sốt xuất huyết?", options: ["🅰️ Ho kéo dài, có đờm", "🅱️ Sốt cao đột ngột, liên tục, kèm chấm xuất huyết dưới da", "🅲️ Đau bụng, tiêu chảy cấp", "🅳️ Sổ mũi, hắt hơi nhẹ"], answer: 1, explanation: "Người mắc sốt xuất huyết thường sốt cao liên tục 39-40 độ, đau mỏi cơ và có thể nổi chấm xuất huyết." },
+            { id: 5, label: "Câu 5", station: 1, category: "Sốt xuất huyết", question: "Khi bản thân hoặc bạn bè có dấu hiệu sốt cao liên tục, em cần làm gì?", options: ["🅰️ Tự mua thuốc uống tại nhà", "🅱️ Tự đi truyền dịch tại trạm xá nhỏ", "🅲️ Báo ngay cho cha mẹ/thầy cô để đưa đến cơ sở y tế khám bệnh", "🅳️ Cứ đi học bình thường, vài ngày sẽ khỏi"], answer: 2, explanation: "Khi nghi ngờ mắc bệnh, tuyệt đối không tự ý mua thuốc mà phải đến cơ sở y tế để được bác sĩ khám." },
+            { id: 6, label: "Câu 6", station: 1, category: "Sốt xuất huyết", question: "Biện pháp nào tiêu diệt muỗi trưởng thành hiệu quả trong gia đình?", options: ["🅰️ Dùng bình xịt muỗi, nhang muỗi, vợt điện", "🅱️ Chỉ cần bật quạt mạnh", "🅲️ Đóng kín cửa cả ngày", "🅳️ Trồng nhiều cây cỏ rậm rạp quanh nhà"], answer: 0, explanation: "Có thể dùng bình xịt côn trùng, nhang muỗi, vợt điện hoặc ngủ màn để tránh muỗi đốt." },
+            { id: 7, label: "Câu 7", station: 1, category: "Sốt xuất huyết", question: "Làm thế nào để diệt lăng quăng (bọ gậy) phòng bệnh sốt xuất huyết?", options: ["🅰️ Đổ hóa chất độc hại xuống ao hồ", "🅱️ Thau rửa, đậy kín lu/khạp, thả cá vào bể chứa nước", "🅲️ Xịt thuốc diệt muỗi lên mặt nước", "🅳️ Dùng vợt điện vớt lăng quăng"], answer: 1, explanation: "Diệt lăng quăng là biện pháp cốt lõi: lật úp vật phế thải đọng nước, đậy kín nắp lu, thả cá 7 màu." },
+            { id: 8, label: "Câu 8", station: 1, category: "Sốt xuất huyết", question: "Hoạt động vệ sinh môi trường nào học sinh có thể làm để phòng bệnh tại trường?", options: ["🅰️ Vứt rác bừa bãi ra sân trường", "🅱️ Thu gom vỏ chai, hộp nhựa, lá cây đọng nước quanh lớp học", "🅲️ Đổ nước thừa ra sàn lớp", "🅳️ Trồng thêm cây rậm rạp gần cửa sổ"], answer: 1, explanation: "Dọn dẹp phế thải, vỏ hộp đọng nước giúp loại bỏ nơi sinh sản của muỗi ngay tại trường học." },
+            { id: 9, label: "Câu 9", station: 1, category: "Sốt xuất huyết", question: "Đối tượng nào có thể mắc bệnh sốt xuất huyết?", options: ["🅰️ Chỉ có trẻ em", "🅱️ Chỉ có người lớn", "🅲️ Cả trẻ em và người lớn đều có thể mắc bệnh", "🅳️ Chỉ người già"], answer: 2, explanation: "Sốt xuất huyết không phân biệt độ tuổi. Ai cũng có nguy cơ nhiễm bệnh nếu bị muỗi vằn mang vi-rút đốt." },
+            { id: 10, label: "Câu 10", station: 1, category: "Sốt xuất huyết", question: "Đặc điểm nhận dạng dễ thấy nhất của muỗi truyền bệnh Sốt xuất huyết là gì?", options: ["🅰️ Có màu xanh lá cây", "🅱️ Thân to, cánh dài trong suốt", "🅲️ Có các khoang (vằn) đen trắng trên thân và chân", "🅳️ Chỉ bay vào ban đêm"], answer: 2, explanation: "Muỗi Aedes thường được gọi là 'muỗi vằn' vì có các vằn đen trắng rõ rệt trên chân và thân." },
+
+            // TRẠM 2: BỆNH BẠI LIỆT
+            { id: 11, label: "Câu 11", station: 2, category: "Bệnh bại liệt", question: "Bệnh bại liệt do tác nhân nào gây ra?", options: ["🅰️ Vi khuẩn E. coli", "🅱️ Vi-rút Polio", "🅲️️ Ký sinh trùng sốt rét", "🅳️ Nấm ngoài da"], answer: 1, explanation: "Bệnh bại liệt là một bệnh truyền nhiễm cấp tính do vi-rút Polio gây ra." },
+            { id: 12, label: "Câu 12", station: 2, category: "Bệnh bại liệt", question: "Vi-rút bại liệt chủ yếu tấn công và gây tổn thương hệ cơ quan nào trong cơ thể?", options: ["🅰️ Hệ tiêu hóa", "🅱️ Hệ hô hấp", "🅲️ Hệ thần kinh (tủy sống)", "🅳️ Hệ tuần hoàn"], answer: 2, explanation: "Vi-rút Polio xâm nhập vào hệ thần kinh trung ương, tổn thương tủy sống gây yếu liệt cơ." },
+            { id: 13, label: "Câu 13", station: 2, category: "Bệnh bại liệt", question: "Bệnh bại liệt lây truyền chủ yếu qua đường nào?", options: ["🅰️ Đường tiêu hóa (phân - miệng)", "🅱️ Đường máu", "🅲️ Qua vết cắn của động vật", "🅳️ Qua di truyền từ mẹ sang con"], answer: 0, explanation: "Bệnh lây truyền qua đường tiêu hóa do ăn uống thực phẩm/nước nhiễm vi-rút từ phân người bệnh." },
+            { id: 14, label: "Câu 14", station: 2, category: "Bệnh bại liệt", question: "Biện pháp phòng ngừa bệnh bại liệt chủ động và hiệu quả nhất là gì?", options: ["🅰️ Uống nhiều nước ép trái cây", "🅱️ Uống và tiêm vắc-xin phòng bệnh bại liệt", "🅲️ Mặc quần áo ấm vào mùa đông", "🅳️ Hạn chế ra khỏi nhà"], answer: 1, explanation: "Vắc-xin bại liệt giúp cơ thể tạo kháng thể bảo vệ, là cách phòng bệnh an toàn và hiệu quả nhất." },
+            { id: 15, label: "Câu 15", station: 2, category: "Bệnh bại liệt", question: "Tại sao việc rửa tay bằng xà phòng lại quan trọng trong phòng chống bệnh bại liệt?", options: ["🅰️ Giúp tay thơm hơn", "🅱️ Làm tay mềm mại hơn", "🅲️ Loại bỏ vi-rút, vi khuẩn bám trên tay, ngăn lây nhiễm qua đường tiêu hóa", "🅳️ Giúp tay nhanh khô hơn"], answer: 2, explanation: "Rửa tay xà phòng tiêu diệt vi-rút, cắt đứt đường lây truyền từ tay lên miệng." },
+            { id: 16, label: "Câu 16", station: 2, category: "Bệnh bại liệt", question: "Học sinh nên rửa tay bằng xà phòng vào những thời điểm quan trọng nào?", options: ["🅰️ Trước khi ăn và sau khi đi vệ sinh", "🅱️ Chỉ sau khi ngủ dậy", "🅲️ Chỉ khi thấy tay dính bùn đất", "🅳️ Sau khi xem tivi"], answer: 0, explanation: "Rửa tay trước khi ăn và sau khi đi vệ sinh là hai thời điểm vàng để phòng bệnh lây qua đường tiêu hóa." },
+            { id: 17, label: "Câu 17", station: 2, category: "Bệnh bại liệt", question: "Việc sử dụng nước sạch và ăn chín uống sôi có ý nghĩa gì đối với phòng bệnh bại liệt?", options: ["🅰️ Tránh ngộ độc thực phẩm", "🅱️ Ngăn ngừa nuốt phải vi-rút Polio có trong nước và thức ăn bị ô nhiễm", "🅲️ Tiết kiệm tiền", "🅳️ Làm thức ăn ngon hơn"], answer: 1, explanation: "Ăn chín, uống sôi giúp tiêu diệt hoặc tránh đưa vi-rút vào cơ thể qua đường ăn uống." },
+            { id: 18, label: "Câu 18", station: 2, category: "Bệnh bại liệt", question: "Lịch tiêm hoặc uống vắc-xin phòng bệnh bại liệt thường bắt đầu khi nào?", options: ["🅰️ Khi trẻ đã lớn và đi học cấp 2", "🅱️ Từ khi trẻ còn rất nhỏ (trong năm đầu đời)", "🅲️ Khi người lớn đi làm", "🅳️ Chỉ khi có dịch bệnh xảy ra"], answer: 1, explanation: "Trẻ em cần được uống/tiêm vắc-xin bại liệt theo chương trình mở rộng ngay từ những tháng đầu đời." },
+            { id: 19, label: "Câu 19", station: 2, category: "Bệnh bại liệt", question: "Biện pháp vệ sinh môi trường nào sau đây giúp phòng bệnh bại liệt?", options: ["🅰️ Sử dụng nhà tiêu hợp vệ sinh, không phóng uế bừa bãi", "🅱️ Đốt rác trước nhà", "🅲️ Thả cá xuống ao", "🅳️ Trồng nhiều cây xanh"], answer: 0, explanation: "Quản lý tốt nguồn phân, sử dụng hố xí hợp vệ sinh giúp mầm bệnh không phát tán ra môi trường." },
+            { id: 20, label: "Câu 20", station: 2, category: "Bảo vệ cộng đồng", question: "Là học sinh THCS, em có thể làm gì để góp phần bảo vệ sức khỏe cộng đồng?", options: ["🅰️ Không làm gì cả vì em còn nhỏ", "🅱️ Giấu diếm khi bạn bè có dấu hiệu mắc bệnh", "🅲️ Thực hiện tốt vệ sinh cá nhân và nhắc nhở mọi người cùng phòng bệnh", "🅳️ Chia sẻ tin đồn không rõ nguồn gốc"], answer: 2, explanation: "Mỗi học sinh đều có thể là một tuyên truyền viên nhỏ tuổi lan tỏa ý thức phòng bệnh đến mọi người." }
+        ];
+
+        // Biến trạng thái
+        let currentQIndex = 0;
+        let score = 0;
+        let wrongAnswersData = [];
+        let isSoundOn = true;
+        let sessionStats = { correct: 0, wrong: 0 };
+        let playerName = "";
+        let playerClass = "";
+        const totalQuestions = questions.length;
+
+        const screens = {
+            start: document.getElementById('screen-start'),
+            guide: document.getElementById('screen-guide'),
+            map: document.getElementById('screen-map'),
+            game: document.getElementById('screen-game'),
+            end: document.getElementById('screen-end'),
+            review: document.getElementById('screen-review')
+        };
+        const modalFeedback = document.getElementById('modal-feedback');
+
+        // Hàm âm thanh
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, vol=0.1) {
+            if (!isSoundOn) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+            oscillator.start(); oscillator.stop(audioCtx.currentTime + duration);
+        }
+        function playSound(type) {
+            if (!isSoundOn) return;
+            switch(type) {
+                case 'click': playTone(400, 'sine', 0.1, 0.05); break;
+                case 'correct': playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(800, 'sine', 0.2, 0.15), 100); break;
+                case 'wrong': playTone(300, 'triangle', 0.3, 0.1); setTimeout(() => playTone(250, 'triangle', 0.3, 0.1), 150); break;
+                case 'win': [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.2, 0.1), i * 150)); break;
+            }
+        }
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+            const btn = document.getElementById('btn-sound');
+            btn.innerHTML = isSoundOn ? '🔊' : '🔇';
+            btn.classList.toggle('opacity-50', !isSoundOn);
+            if(isSoundOn) playSound('click');
+        }
+
+        // Điều khiển giao diện
+        function showScreen(screenId) {
+            playSound('click');
+            Object.values(screens).forEach(s => s.classList.add('hide'));
+            document.getElementById(screenId).classList.remove('hide');
+        }
+
+        function startGame() {
+            playerName = document.getElementById('start-name').value.trim();
+            playerClass = document.getElementById('start-class').value.trim();
+            
+            if (!playerName || !playerClass) {
+                playSound('wrong');
+                document.getElementById('start-error').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('start-error').classList.add('hidden');
+            
+            // Cập nhật tên hiển thị ở các màn hình
+            document.getElementById('display-player-name').innerText = `👤 Chiến binh: ${playerName} - Lớp: ${playerClass}`;
+            document.getElementById('end-player-info').innerText = `Học sinh: ${playerName} - Lớp: ${playerClass}`;
+            
+            initGame();
+        }
+
+        function initGame() {
+            currentQIndex = 0; score = 0; wrongAnswersData = []; sessionStats = { correct: 0, wrong: 0 };
+            showScreen('screen-map'); updateMap();
+        }
+
+        function startLevel() { showScreen('screen-game'); renderQuestion(); }
+
+        function updateMap() {
+            const isStation2 = currentQIndex >= 10; // Cập nhật mốc chuyển Trạm (câu 11)
+            const n1 = document.getElementById('node-station-1');
+            const n2 = document.getElementById('node-station-2');
+            n1.className = 'map-node scale-125 shadow-xl'; n2.className = 'map-node scale-125 shadow-xl';
+            if (!isStation2) n1.classList.add('active');
+            else { n1.classList.add('completed'); n2.classList.add('active'); }
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQIndex];
+            const badge = document.getElementById('station-badge');
+            
+            if (q.station === 1) {
+                badge.className = "bg-orange-100/95 backdrop-blur-sm text-orange-700 px-6 py-3 rounded-full font-black text-xl md:text-2xl border-4 border-orange-300 shadow-lg uppercase";
+                badge.innerHTML = "🦟 TRẠM 1: SỐT XUẤT HUYẾT";
+            } else {
+                badge.className = "bg-teal-100/95 backdrop-blur-sm text-teal-700 px-6 py-3 rounded-full font-black text-xl md:text-2xl border-4 border-teal-300 shadow-lg uppercase";
+                badge.innerHTML = "💉 TRẠM 2: BẠI LIỆT";
+            }
+
+            document.getElementById('question-counter').innerText = `${q.label.toUpperCase()} / ${totalQuestions}`;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('progress-bar').style.width = `${(currentQIndex / totalQuestions) * 100}%`;
+            document.getElementById('question-text').innerText = q.question;
+            
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                // Nút đáp án to, rõ ràng, bo tròn 3xl phù hợp với thiết kế mới
+                btn.className = "btn-option p-5 md:p-8 rounded-3xl text-gray-800 font-black text-xl md:text-3xl flex items-center shadow-lg w-full leading-snug tracking-wide";
+                btn.innerHTML = `<span class="pointer-events-none">${optText}</span>`;
+                btn.onclick = () => checkAnswer(index, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            document.querySelectorAll('.btn-option').forEach(b => b.onclick = null);
+            btnElement.classList.add('selected');
+            const q = questions[currentQIndex];
+            if (selectedIndex === q.answer) {
+                score += 10; sessionStats.correct++; playSound('correct'); showFeedbackModal(true, q);
+            } else {
+                sessionStats.wrong++; wrongAnswersData.push(q); playSound('wrong'); showFeedbackModal(false, q);
+            }
+        }
+
+        function showFeedbackModal(isCorrect, q) {
+            modalFeedback.classList.remove('hide');
+            const icon = document.getElementById('feedback-icon');
+            icon.classList.remove('animate-pop'); void icon.offsetWidth; icon.classList.add('animate-pop');
+
+            if (isCorrect) {
+                icon.innerText = "🎉";
+                document.getElementById('feedback-title').innerText = "CHÍNH XÁC!";
+                document.getElementById('feedback-title').className = "text-4xl md:text-5xl font-black text-green-500 mb-2 uppercase";
+                document.getElementById('feedback-score').innerHTML = "⭐ +10 điểm";
+                document.getElementById('feedback-score').className = "text-3xl font-black text-yellow-500 mb-6 flex items-center justify-center gap-2 drop-shadow-md";
+                document.getElementById('feedback-correct-ans').classList.add('hide');
+                createConfetti();
+            } else {
+                icon.innerText = "💡";
+                document.getElementById('feedback-title').innerText = "CHƯA ĐÚNG!";
+                document.getElementById('feedback-title').className = "text-4xl md:text-5xl font-black text-orange-500 mb-2 uppercase";
+                document.getElementById('feedback-score').innerHTML = "Đừng lo, hãy học từ sai lầm!";
+                document.getElementById('feedback-score').className = "text-xl font-bold text-gray-500 mb-6";
+                document.getElementById('feedback-correct-ans').classList.remove('hide');
+                document.getElementById('correct-text').innerText = q.options[q.answer].substring(3); 
+            }
+            document.getElementById('feedback-explanation').innerHTML = `<strong>Giải thích:</strong> ${q.explanation}`;
+        }
+
+        function handleNextQuestion() {
+            playSound('click'); modalFeedback.classList.add('hide');
+            currentQIndex++;
+            if (currentQIndex === 10) { // Chuyển trạm
+                showScreen('screen-map'); updateMap(); setTimeout(startLevel, 2000);
+            } else if (currentQIndex < totalQuestions) {
+                renderQuestion();
+            } else endGame();
+        }
+
+        function endGame() {
+            playSound('win'); showScreen('screen-end');
+            document.getElementById('end-score').innerText = score;
+            document.getElementById('end-correct').innerText = sessionStats.correct;
+            document.getElementById('end-wrong').innerText = sessionStats.wrong;
+            
+            const percentage = Math.round((sessionStats.correct / totalQuestions) * 100);
+            const bIcon = document.getElementById('end-badge-icon');
+            const bName = document.getElementById('end-badge-name');
+            
+            if (percentage >= 90) { bIcon.innerText = "🏆"; bName.innerText = "CHIẾN BINH XUẤT SẮC"; bName.className = "text-3xl md:text-4xl font-black text-yellow-600 mb-6"; }
+            else if (percentage >= 70) { bIcon.innerText = "⭐"; bName.innerText = "NGƯỜI BẢO VỆ"; bName.className = "text-3xl md:text-4xl font-black text-blue-600 mb-6"; }
+            else if (percentage >= 50) { bIcon.innerText = "💪"; bName.innerText = "CHIẾN BINH TIẾN BỘ"; bName.className = "text-3xl md:text-4xl font-black text-green-600 mb-6"; }
+            else { bIcon.innerText = "🌱"; bName.innerText = "CẦN LUYỆN TẬP THÊM"; bName.className = "text-3xl md:text-4xl font-black text-orange-600 mb-6"; }
+            
+            if(wrongAnswersData.length > 0) buildReviewList();
+            createConfetti(100);
+        }
+
+        function showReview() { showScreen('screen-review'); }
+
+        function buildReviewList() {
+            const list = document.getElementById('review-list'); list.innerHTML = '';
+            wrongAnswersData.forEach(q => {
+                const card = document.createElement('div');
+                card.className = "bg-blue-50/80 p-6 md:p-8 rounded-3xl border-4 border-blue-100 shadow-sm";
+                card.innerHTML = `
+                    <div class="text-lg font-black text-blue-500 mb-2">${q.label.toUpperCase()} - ${q.category.toUpperCase()}</div>
+                    <div class="font-black text-gray-800 text-2xl md:text-3xl mb-4 leading-tight">${q.question}</div>
+                    <div class="bg-green-100 text-green-900 p-4 rounded-xl text-xl md:text-2xl mb-4 border-2 border-green-200 font-bold">✅ Đáp án đúng: ${q.options[q.answer].substring(3)}</div>
+                    <div class="text-xl md:text-2xl text-gray-700 font-medium italic border-l-8 border-blue-400 pl-5 leading-relaxed bg-white/50 p-4 rounded-r-xl">${q.explanation}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Hiệu ứng pháo giấy
+        function createConfetti(amount = 50) {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7'];
+            for (let i = 0; i < amount; i++) {
+                const c = document.createElement('div');
+                c.style.cssText = `position:absolute; width:12px; height:12px; background-color:${colors[Math.floor(Math.random()*colors.length)]}; top:-15px; left:${Math.random()*100}vw; opacity:${Math.random()+0.5}; transform:rotate(${Math.random()*360}deg); border-radius:${Math.random()>0.5?'50%':'0'};`;
+                container.appendChild(c);
+                const d = Math.random()*2+2, delay = Math.random()*0.2;
+                c.animate([ { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 }, { transform: `translate3d(${Math.random()*200-100}px, 100vh, 0) rotate(${Math.random()*720}deg)`, opacity: 0 } ], { duration: d*1000, delay: delay*1000, easing: 'cubic-bezier(.37,0,.63,1)', fill: 'forwards' });
+                setTimeout(() => c.remove(), (d+delay)*1000);
+            }
+        }
+
+        // Kết nối Google Sheets
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3JSYDZupanvbWtOuxVGlzFKyNpvNEQ3auvYR6pIRTqTkvvvBgDX97q1YqYlNnGIad/exec';
+
+        function submitResult() {
+            const btn = document.getElementById('btn-submit-result');
+            const status = document.getElementById('submit-status');
+
+            if (!playerName || !playerClass) {
+                status.innerText = '⚠️ Lỗi dữ liệu học sinh. Vui lòng tải lại trang!';
+                status.className = 'mt-4 text-xl font-black text-center text-red-500 drop-shadow-sm';
+                status.classList.remove('hidden'); return;
+            }
+
+            playSound('click');
+            btn.innerText = '⏳ ĐANG GỬI...'; btn.disabled = true; btn.classList.add('opacity-50'); status.classList.add('hidden');
+
+            fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lop: playerClass, hoTen: playerName, diem: score, soCauDung: sessionStats.correct })
+            }).then(() => {
+                btn.innerText = '✅ ĐÃ LƯU BẢNG VÀNG'; btn.classList.replace('bg-green-500', 'bg-gray-400'); btn.classList.replace('hover:bg-green-600', 'hover:bg-gray-500');
+                createConfetti(60);
+            }).catch(() => {
+                btn.innerText = '❌ LỖI! THỬ LẠI'; btn.disabled = false; btn.classList.remove('opacity-50');
+                status.innerText = 'Không thể kết nối. Vui lòng kiểm tra mạng.'; status.className = 'mt-3 text-lg font-bold text-center text-red-500'; status.classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
